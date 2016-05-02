@@ -1,15 +1,19 @@
+# Description
+
 Thin wrapper around standard `httptest` library for creating mocked JSON HTTP responses easily.
 
-# Example
+## Example
 
 Create a server by calling `MockServer` function providing the necessary endpoints defining the path, HTTP response code and the content of the response.  
 
-All responses will include `Content-Type` header as `application/json`.
+All responses will have `application/json` in `Content-Type` header. 
 
 ```
+import "github.com/burdiyan/httptest"
+
 server := httptest.MockServer(
-    &Endpoint{"/foo", 200, `{"success": true}`},
-    &Endpoint{"/bar", 404, `{"success": false}`},
+    &httptest.Endpoint{"/foo", 200, `{"success": true}`},
+    &httptest.Endpoint{"/bar", 404, `{"success": false}`},
 )
 ```
 
