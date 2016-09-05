@@ -8,6 +8,11 @@ import (
 	"net/http/httptest"
 )
 
+// Server is an alias of the server from httptest.
+type Server struct {
+	*httptest.Server
+}
+
 // Endpoint represents mocked http endpoint.
 type Endpoint struct {
 	// Route is a URL path starting with slash.
@@ -38,7 +43,7 @@ func HTMLEndpoint(route string, statusCode int, content string) *Endpoint {
 }
 
 // MockServer assembles mocked HTTP server with necessary routes.
-func MockServer(endpoints ...*Endpoint) *httptest.Server {
+func MockServer(endpoints ...*Endpoint) *Server {
 	mux := http.NewServeMux()
 
 	for _, e := range endpoints {
@@ -49,5 +54,5 @@ func MockServer(endpoints ...*Endpoint) *httptest.Server {
 		})
 	}
 
-	return httptest.NewServer(mux)
+	return &Server{httptest.NewServer(mux)}
 }
