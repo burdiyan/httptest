@@ -1,4 +1,4 @@
-// Thin wraper around standard httptest library for easy mocking JSON HTTP responses.
+// Thin wrapper around standard httptest library for easy mocking JSON HTTP responses.
 
 package httptest
 
@@ -11,20 +11,41 @@ import (
 // Endpoint represents mocked http endpoint.
 type Endpoint struct {
 	// Route is a URL path starting with slash.
-	Route      string
-	StatusCode int
-	Content    string
+	Route       string
+	StatusCode  int
+	Content     string
+	ContentType string
 }
 
-// MockServer assebles mocked HTTP server with necessary routes.
+// JSONEndpoint creates the endpoint with content type for JSON.
+func JSONEndpoint(route string, statusCode int, content string) *Endpoint {
+	return &Endpoint{
+		Route:       route,
+		StatusCode:  statusCode,
+		Content:     content,
+		ContentType: "application/json",
+	}
+}
+
+// HTMLEndpoint created the endpoint with content type for HTML.
+func HTMLEndpoint(route string, statusCode int, content string) *Endpoint {
+	return &Endpoint{
+		Route:       route,
+		StatusCode:  statusCode,
+		Content:     content,
+		ContentType: "text/html",
+	}
+}
+
+// MockServer assembles mocked HTTP server with necessary routes.
 func MockServer(endpoints ...*Endpoint) *httptest.Server {
 	mux := http.NewServeMux()
 
-	for _, endpoint := range endpoints {
-		mux.HandleFunc(endpoint.Route, func(w http.ResponseWriter, request *http.Request) {
-			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(endpoint.StatusCode)
-			fmt.Fprint(w, endpoint.Content)
+	for _, e := range endpoints {
+		mux.HandleFunc(e.Route, func(w http.ResponseWriter, request *http.Request) {
+			w.Header().Add("Content-Type", e.ContentType)
+			w.WriteHeader(e.StatusCode)
+			fmt.Fprint(w, e.Content)
 		})
 	}
 

@@ -7,7 +7,7 @@ import (
 )
 
 func TestMockServer(t *testing.T) {
-	server := MockServer(&Endpoint{"/test", 200, "Hello World"})
+	server := MockServer(JSONEndpoint("/test", 200, "Hello World"))
 	defer server.Close()
 
 	response, err := http.Get(server.URL + "/test")
