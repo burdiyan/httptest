@@ -47,12 +47,16 @@ func MockServer(endpoints ...*Endpoint) *Server {
 	mux := http.NewServeMux()
 
 	for _, e := range endpoints {
-		mux.HandleFunc(e.Route, func(w http.ResponseWriter, request *http.Request) {
-			w.Header().Add("Content-Type", e.ContentType)
-			w.WriteHeader(e.StatusCode)
-			fmt.Fprint(w, e.Content)
-		})
+		mux.HandleFunc(e.Route, newHandler(e))
 	}
 
 	return &Server{httptest.NewServer(mux)}
+}
+
+func newHandler(e *Endpoint) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", e.ContentType)
+		w.WriteHeader(e.StatusCode)
+		fmt.Fprintf(w, e.Content)
+	}
 }

@@ -7,29 +7,33 @@ import (
 )
 
 func TestMockServer(t *testing.T) {
-	server := MockServer(JSONEndpoint("/test", 200, "Hello World"))
+	server := MockServer(
+		JSONEndpoint("/test", 200, "Hello World"),
+		JSONEndpoint("/foo", 200, `{"foo":true}`),
+	)
 	defer server.Close()
 
-	response, err := http.Get(server.URL + "/test")
-	if err != nil {
-		t.Error(err)
-	}
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		t.Error(err)
+	cases := []struct {
+		url      string
+		expected string
+	}{
+		{"/test", "Hello World"},
+		{"/foo", `{"foo":true}`},
 	}
 
-	if string(body) != "Hello World" {
-		t.Error("Fake HTTP server is not working properly!")
-	}
+	for _, c := range cases {
+		resp, err := http.Get(server.URL + c.url)
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	if response.StatusCode != 200 {
-		t.Errorf("Expected 200 response code, %d given", response.StatusCode)
-	}
-
-	if response.Header.Get("Content-Type") != "application/json" {
-		t.Error("Content-Type should be application/json!")
+		if string(body) != c.expected {
+			t.Fatalf("expected: %q, got: %q", c.expected, body)
+		}
 	}
 }
